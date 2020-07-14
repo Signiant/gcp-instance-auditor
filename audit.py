@@ -17,7 +17,7 @@ def list_projects(credentials, parent):
     all_projects = response.get('projects', [])
     trimmed_list = []
     for project in all_projects:
-        if (not parent) or project['parent']['id'] in parent:
+        if not parent or project['parent']['id'] in parent:
             trimmed_list.append(project)
     return sorted(trimmed_list, key=lambda i: i['projectId'])
 
@@ -53,25 +53,31 @@ if __name__ == '__main__':
 
     if args.folder is not None:
         parent_folder = args.folder
-        print('Only getting instances in projects: %s' % parent_folder)
+        print('Only getting instances from projects in folder: %s' % parent_folder)
     else:
         parent_folder = None
-        print('No folder filter, getting instances from all projects')
+        print('No folder filter supplied, getting instances from all projects')
 
     if args.account is not None:
         credentials = service_account.Credentials.from_service_account_file(args.account)
     else:
         credentials = None
 
-    project_list = list_projects(credentials, parent_folder)
+    try:
+        project_list = list_projects(credentials, parent_folder)
+    except Exception as e:
+        print(e)
+        project_list = None
     total = 0
-    for project in project_list:
-        instances = list_instances(credentials, project['projectId'])
-        if instances:
-            print('\nProject: %s' % project['name'])
-            print('instance count: %s' % len(instances))
-            total += len(instances)
-            for instance in instances:
-                instance_type = instance['machineType'].split('/')[-1]
-                print('  %s - %s' % (instance['name'], instance_type))
-    print('\n\nTotal number of instances: %s' % total)
+    if project_list:
+        for project in project_list:
+            instances = list_instances(credentials, project['projectId'])
+            if instances:
+                print('\nProject: %s' % project['name'])
+                print(' Folder: %s' % parent_folder)
+                print('  Count: %s' % len(instances))
+                total += len(instances)
+                for instance in instances:
+                    instance_type = instance['machineType'].split('/')[-1]
+                    print('    %s - %s' % (instance['name'], instance_type))
+        print('\n\nTotal number of instances: %s' % total)

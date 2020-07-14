@@ -13,4 +13,6 @@ Flags:
 --folder *GCP folder(s) to limit your search. If not given, will default to all projects*  
 --account *service account JSON file to use to authenticate. If not supplied, use default application credentials*
 
-Credentials in ~/.config/gcloud are created by the **gcloud auth login** command
+Credentials in ~/.config/gcloud are created by the gcloud cli tool  
+
+gcloud auth application-default login
