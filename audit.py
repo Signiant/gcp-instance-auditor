@@ -59,17 +59,21 @@ if __name__ == '__main__':
         print('No folder filter supplied, getting instances from all projects')
 
     if args.account is not None:
+        print('Using supplied credentials file')
         credentials = service_account.Credentials.from_service_account_file(args.account)
     else:
+        print('Using application default credentials')
         credentials = None
 
     try:
+        print('Getting project list')
         project_list = list_projects(credentials, parent_folder)
     except Exception as e:
         print(e)
         project_list = None
     total = 0
     if project_list:
+        print('Getting instance list')
         for project in project_list:
             instances = list_instances(credentials, project['projectId'])
             if instances:
