@@ -14,11 +14,23 @@ def list_projects(credentials, parent):
         service = discovery.build('cloudresourcemanager', 'v1')
     request = service.projects().list()
     response = request.execute()
-    all_projects = response.get('projects', [])
     trimmed_list = []
+    if 'projects' in response:
+        all_projects = response.get('projects', [])
+    else:
+        print('Error getting project list - no projects returned')
+        return None
+
     for project in all_projects:
-        if not parent or project['parent']['id'] in parent:
+        if not parent:
             trimmed_list.append(project)
+        else:
+            if 'parent' in project:
+                if project['parent']['id'] in parent:
+                    trimmed_list.append(project)
+            else:
+                print('Project %s has no parent. Weird.' % project['name'])
+
     return sorted(trimmed_list, key=lambda i: i['projectId'])
 
 
@@ -66,7 +78,7 @@ if __name__ == '__main__':
     try:
         project_list = list_projects(credentials, parent_folder)
     except Exception as e:
-        print(e)
+        print('Exception getting list of projects: %e' % e)
         project_list = None
     total = 0
     if project_list:
